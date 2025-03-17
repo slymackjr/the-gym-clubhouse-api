@@ -29,6 +29,7 @@ return new class extends Migration
             
             // Package and discount details
             $table->string('package_name');
+            $table->string('memo')->nullable();
             $table->decimal('discount_percentage', 5, 2)->nullable();
             
             // Dates
