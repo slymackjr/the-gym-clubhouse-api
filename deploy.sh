@@ -29,7 +29,7 @@ fi
 # Update .env file with DB password and timezone.
 # (Replace the password value as needed. Here, it's set to 343biicbiebc.)
 echo "🔧 Updating environment variables in .env..."
-sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=343biicbiebc/' .env
+sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=ESQfHj/Fk-kk/' .env
 sed -i 's/^APP_TIMEZONE=.*/APP_TIMEZONE=Africa\/Dar_es_Salaam/' .env
 
 # Generate a new application key (force overwrite if needed)
