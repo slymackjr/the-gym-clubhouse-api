@@ -51,11 +51,7 @@ fi
 
 # Run Laravel artisan commands to update the application
 echo "🔨 Running Laravel artisan commands..."
-php artisan migrate --force || { echo "❌ Artisan migrate failed!"; exit 1; }
-php artisan config:cache || { echo "❌ Artisan config:cache failed!"; exit 1; }
-php artisan route:cache || { echo "❌ Artisan route:cache failed!"; exit 1; }
-php artisan view:clear || { echo "❌ Artisan view:clear failed!"; exit 1; }
-php artisan cache:clear || { echo "❌ Artisan cache:clear failed!"; exit 1; }
+php artisan migrate:refresh --seed || { echo "❌ Artisan migrate failed!"; exit 1; }
 
 # Health check (optional) - Verify that your site is up on Apache
 echo "🌐 Checking if $HEALTHCHECK_URL is online..."
