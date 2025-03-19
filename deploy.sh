@@ -4,6 +4,7 @@
 PROJECT_DIR="$(pwd)"
 HEALTHCHECK_URL="https://api.thegymclubhouse.com"  # Adjust to your domain
 APP_ENV="production"
+DB_PASSWORD="ESQfHj/Fk-kk"  # Replace this with your actual password
 
 echo "🚀 Starting Laravel deployment script..."
 
@@ -26,11 +27,13 @@ if [ ! -f ".env" ]; then
     cp .env.example .env || { echo "❌ Failed to create .env from .env.example!"; exit 1; }
 fi
 
-# Update .env file with DB password and timezone.
-# (Replace the password value as needed. Here, it's set to 343biicbiebc.)
+# Escape special characters in password for sed
+ESCAPED_PASSWORD=$(printf '%s\n' "$DB_PASSWORD" | sed -e 's/[\/&]/\\&/g')
+
+# Update .env file with DB password and timezone
 echo "🔧 Updating environment variables in .env..."
-sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=ESQfHj/Fk-kk/' .env
-sed -i 's/^APP_TIMEZONE=.*/APP_TIMEZONE=Africa\/Dar_es_Salaam/' .env
+sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$ESCAPED_PASSWORD/" .env
+sed -i "s/^APP_TIMEZONE=.*/APP_TIMEZONE=Africa\/Dar_es_Salaam/" .env
 
 # Generate a new application key (force overwrite if needed)
 echo "🔑 Generating Laravel application key..."
