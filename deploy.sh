@@ -7,8 +7,8 @@ APP_ENV="production"
 DB_HOST="127.0.0.1"
 DB_PORT="3306"
 DB_DATABASE="gym-clubhousedb"   
-DB_USERNAME="joker"     
-DB_PASSWORD="JErry#code0987!"  
+DB_USERNAME="root"     
+DB_PASSWORD="Jerrycode@0987!"  
 APP_TIMEZONE="Africa/Dar_es_Salaam"
 
 # Deployment steps
