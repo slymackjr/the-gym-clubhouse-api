@@ -1,74 +1,65 @@
 #!/bin/bash
 
-# Set variables
+# Configuration
 PROJECT_DIR="$(pwd)"
-HEALTHCHECK_URL="https://api.thegymclubhouse.com"  # Adjust to your domain
 APP_ENV="production"
-DB_PASSWORD="ESQfHj/Fk-kk"  # Replace with actual password
+DB_HOST="localhost"
+DB_PORT="3306"
+DB_DATABASE="gym-clubhousedb"   
+DB_USERNAME="joker"     
+DB_PASSWORD="JErry#code0987!"  
+APP_TIMEZONE="Africa/Dar_es_Salaam"
 
-echo "🚀 Starting Laravel deployment script..."
+# Deployment steps
+cd "$PROJECT_DIR" || { echo "Failed to enter project directory"; exit 1; }
 
-# Set Git configuration for GitHub
-echo "🔧 Configuring Git settings..."
-git config pull.rebase false
-git config --global user.email "jbnyamasheki@gmail.com"
-git config --global user.name "slymackjr"
+# Git operations
+echo "Updating code from repository..."
+git pull origin master || { echo "Git pull failed"; exit 1; }
 
-# Ensure we're in the project directory
-cd "$PROJECT_DIR" || { echo "❌ Failed to navigate to project directory!"; exit 1; }
-
-# Check PHP version and extensions
-echo "🔍 Checking PHP requirements..."
-PHP_VERSION=$(php -r "echo PHP_VERSION;")
-REQUIRED_EXTENSIONS=("mbstring" "openssl" "pdo" "tokenizer" "xml")
-
-echo "🔍 PHP version: $PHP_VERSION"
-for ext in "${REQUIRED_EXTENSIONS[@]}"; do
-    php -m | grep -q "$ext" || { echo "❌ Required PHP extension $ext is missing!"; exit 1; }
-done
-
-# Pull the latest changes from Git
-echo "📥 Pulling latest changes..."
-git pull origin master || { echo "❌ Failed to pull latest changes!"; exit 1; }
-
-# If .env doesn't exist, copy from .env.example
+# Environment setup
 if [ ! -f ".env" ]; then
-    echo "⚠️ .env file not found. Copying from .env.example..."
-    cp .env.example .env || { echo "❌ Failed to create .env from .env.example!"; exit 1; }
+    cp .env.example .env || { echo "Failed to create .env file"; exit 1; }
 fi
 
-# Escape special characters in password for sed
+# Secure password handling
 ESCAPED_PASSWORD=$(printf '%s\n' "$DB_PASSWORD" | sed -e 's/[\/&]/\\&/g')
 
-# Update .env file with DB password and timezone
-echo "🔧 Updating environment variables in .env..."
-sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=$ESCAPED_PASSWORD/" .env
-sed -i "s/^APP_TIMEZONE=.*/APP_TIMEZONE=Africa\/Dar_es_Salaam/" .env
+# Update .env file
+echo "Configuring environment..."
+sed -i \
+    -e "s/^DB_HOST=.*/DB_HOST=$DB_HOST/" \
+    -e "s/^DB_PORT=.*/DB_PORT=$DB_PORT/" \
+    -e "s/^DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/" \
+    -e "s/^DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" \
+    -e "s/^DB_PASSWORD=.*/DB_PASSWORD=$ESCAPED_PASSWORD/" \
+    -e "s/^APP_TIMEZONE=.*/APP_TIMEZONE=$APP_TIMEZONE/" \
+    -e "s/^APP_ENV=.*/APP_ENV=$APP_ENV/" \
+    .env
 
-# Install PHP dependencies via Composer
-echo "📦 Installing PHP dependencies..."
-composer install --no-dev --optimize-autoloader || { echo "❌ Composer install failed!"; exit 1; }
+# Dependency management
+echo "Installing PHP dependencies..."
+composer install --no-dev --optimize-autoloader || { echo "Composer install failed"; exit 1; }
 
-# Generate Laravel application key
-echo "🔑 Generating Laravel application key..."
-php artisan key:generate --force || { echo "❌ Artisan key:generate failed!"; exit 1; }
+[ -f "package.json" ] && {
+    echo "Installing frontend dependencies..."
+    npm install || { echo "NPM install failed"; exit 1; }
+}
 
-# Install frontend assets if package.json exists
-if [ -f "package.json" ]; then
-    echo "📦 Installing frontend dependencies..."
-    npm install || { echo "❌ Frontend dependencies installation failed!"; exit 1; }
-fi
+# Laravel specific commands
+echo "Running Laravel optimizations..."
+php artisan key:generate --force || { echo "Key generation failed"; exit 1; }
+php artisan migrate --force || { echo "Migration failed"; exit 1; }
+php artisan optimize:clear || { echo "Cache clear failed"; exit 1; }
 
-# Run Laravel artisan commands to set up the database
-echo "🔨 Running Laravel artisan commands..."
-php artisan migrate:refresh --seed || { echo "❌ Artisan migrate failed!"; exit 1; }
+# Cache warmup
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
-# Health check to verify site is responding
-echo "🌐 Checking if $HEALTHCHECK_URL is online..."
-if curl -s --head --request GET "$HEALTHCHECK_URL" | grep "200 OK" > /dev/null; then
-    echo "✅ $HEALTHCHECK_URL is online. Deployment succeeded."
-else
-    echo "⚠️ $HEALTHCHECK_URL is not responding properly. Please check your application."
-fi
+# Permission fixes
+echo "Setting permissions..."
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
 
-echo "✅ Laravel deployment completed successfully!"
+echo "Deployment completed successfully!"
