@@ -22,20 +22,25 @@ if [ ! -f ".env" ]; then
     cp .env.example .env || { echo "Failed to create .env file"; exit 1; }
 fi
 
-# Secure password handling
-ESCAPED_PASSWORD=$(printf '%s\n' "$DB_PASSWORD" | sed -e 's/[\/&]/\\&/g')
-
 # Update .env file
 echo "Configuring environment..."
 sed -i \
-    -e "s/^DB_HOST=.*/DB_HOST=$DB_HOST/" \
-    -e "s/^DB_PORT=.*/DB_PORT=$DB_PORT/" \
-    -e "s/^DB_DATABASE=.*/DB_DATABASE=$DB_DATABASE/" \
-    -e "s/^DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" \
-    -e "s/^DB_PASSWORD=.*/DB_PASSWORD=$ESCAPED_PASSWORD/" \
-    -e "s/^APP_TIMEZONE=.*/APP_TIMEZONE=$APP_TIMEZONE/" \
-    -e "s/^APP_ENV=.*/APP_ENV=$APP_ENV/" \
+    -e "s|^DB_HOST=.*|DB_HOST=$DB_HOST|" \
+    -e "s|^DB_PORT=.*|DB_PORT=$DB_PORT|" \
+    -e "s|^DB_DATABASE=.*|DB_DATABASE=$DB_DATABASE|" \
+    -e "s|^DB_USERNAME=.*|DB_USERNAME=$DB_USERNAME|" \
+    -e "s|^DB_PASSWORD=.*|DB_PASSWORD=$DB_PASSWORD|" \
+    -e "s|^APP_TIMEZONE=.*|APP_TIMEZONE=$APP_TIMEZONE|" \
+    -e "s|^APP_ENV=.*|APP_ENV=$APP_ENV|" \
     .env
+
+# Install composer if missing
+if ! command -v composer &> /dev/null; then
+    echo "Installing composer..."
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+    php -r "unlink('composer-setup.php');"
+fi    
 
 # Dependency management
 echo "Installing PHP dependencies..."
