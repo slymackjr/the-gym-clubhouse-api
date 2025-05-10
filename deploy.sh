@@ -59,5 +59,10 @@ php artisan key:generate || { echo "Key generation failed"; exit 1; }
 php artisan migrate || { echo "Migration failed"; exit 1; }
 php artisan db:seed || { echo "Seeding failed"; exit 1; }
 
+chown -R www-data:www-data /var/www/key.thegymclubhouse.com/storage
+chmod -R 775 /var/www/key.thegymclubhouse.com/storage
+chown -R www-data:www-data /var/www/key.thegymclubhouse.com/bootstrap/cache
+chmod -R 775 /var/www/key.thegymclubhouse.com/bootstrap/cache
+
 
 echo "Deployment completed successfully!"
