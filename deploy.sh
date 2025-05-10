@@ -55,18 +55,9 @@ composer install --no-dev --optimize-autoloader || { echo "Composer install fail
 
 # Laravel specific commands
 echo "Running Laravel optimizations..."
-php artisan key:generate --force || { echo "Key generation failed"; exit 1; }
-php artisan migrate --force || { echo "Migration failed"; exit 1; }
-php artisan optimize:clear || { echo "Cache clear failed"; exit 1; }
+php artisan key:generate || { echo "Key generation failed"; exit 1; }
+php artisan migrate || { echo "Migration failed"; exit 1; }
+php artisan db:seed || { echo "Seeding failed"; exit 1; }
 
-# Cache warmup
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# Permission fixes
-echo "Setting permissions..."
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
 
 echo "Deployment completed successfully!"
