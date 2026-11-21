@@ -9,7 +9,7 @@
         "barryvdh/laravel-dompdf": "^3.0",
         "barryvdh/laravel-snappy": "^1.0",
         "consoletvs/charts": "^6.7",
-        "laravel/framework": "^11.9",
+        "laravel/framework": "^12.71",
         "laravel/reverb": "^1.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
@@ -65,6 +65,9 @@
     },
     "config": {
         "optimize-autoloader": true,
+        "platform": {
+            "php": "8.2.0"
+        },
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
